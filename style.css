@@ -1,0 +1,16 @@
+body {
+    background-color: #242424;
+    padding: 10px;
+}
+
+label {
+    color: #A5A5A5;
+}
+
+.FractalDiv {
+    min-width: 100px;
+    width: 100%;
+    height: calc(100% - 200px);
+    border: 1px solid #525252;
+    margin-bottom: 20px;
+}
