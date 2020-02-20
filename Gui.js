@@ -40,7 +40,6 @@ class Gui {
     onFractalContainerResize() {
         this.fractal.canvasWidth = this.getContainerInnerWidth();
         this.fractal.canvasHeight = this.getContainerInnerHeight();
-        console.log(this.fractal.canvasWidth, this.fractal.canvasHeight);
         this.fractal.initCanvas().draw();
     }
 
@@ -54,28 +53,17 @@ class Gui {
 
     onIterationsSliderSliderChange() {
         this.fractal.iterations = this.iterationsSliderSlider.value;
-        console.log('I: ' + this.fractal.iterations);
         this.fractal.draw();
     }
 
     onMagnificationFactorSliderChange() {
         this.fractal.magnificationFactor = this.magnificationFactorSlider.value;
-        console.log('M: ' + this.fractal.magnificationFactor);
         this.fractal.draw();
     }
 
     onCcolorSlider() {
-        this.fractal.color = this.colorSlider.value;
-        console.log('C: ' + this.colorSlider.value);
+        this.fractal.color = this.colorSlider.value/100;
         this.fractal.draw();
-    }
-
-    getPanX() {
-        return this.fractal.panX;
-    }
-
-    getPanY() {
-        return this.fractal.panY;
     }
 
     onPanXChange() {

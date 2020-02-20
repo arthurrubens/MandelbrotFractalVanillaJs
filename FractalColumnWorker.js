@@ -9,7 +9,7 @@ function checkIfBelongsToMandelbrotSet(x, y, iterations) {
 
         // Return a number as a percentage
         if (realComponentOfResult * imaginaryComponentOfResult > 5) {
-            return (i / iterations * 100);
+            return (i / iterations);
         }
     }
     return 0;   // Return zero if in set    
@@ -33,6 +33,5 @@ onmessage = function (e) {
             );
         }
     }
-    //console.log('Workder: ', message.workerId, message.x, message.xWidth);
     postMessage(message);
 }
