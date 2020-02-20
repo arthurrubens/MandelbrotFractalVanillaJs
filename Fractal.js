@@ -9,12 +9,14 @@ class Fractal {
         this.magnificationFactor = 351;
         this.panX = 1.92;
         this.panY = 1.08;
-        this.iterations = 80;
-        this.numberOfWorkers = 10;
+        this.iterations = 25;
+        this.numberOfWorkers = 20;
         this.workers = [];
         this.numberOfBusyWorkers = 0;
-        this.xWidth = 200;
+        this.xWidth = 100;
         this.createWorkers();
+        this.colorPinter = 0;
+        this.maxNumberOfColors = 3;
     }
 
     initCanvas() {
@@ -47,7 +49,7 @@ class Fractal {
     }
 
     terminateWorkers() {
-        for (let i = 0; i < this.numberOfWorkers; i++) {
+        for (let i = 0; i < this.workers.length; i++) {
             if (this.workers[i] && this.workers[i].terminate) {
                 this.workers[i].terminate();
             }
@@ -56,6 +58,7 @@ class Fractal {
     }
 
     draw() {
+        console.time("Fractal Calculation");
         let workerId = 0,
             xWidth = this.xWidth;
         if (!this.myCanvas) {
@@ -63,7 +66,7 @@ class Fractal {
         }
         this.workersX = 0;
 
-        while(
+        while (
             workerId < this.numberOfWorkers
             && this.workersX < this.myCanvas.width
         ) {
@@ -115,7 +118,7 @@ class Fractal {
     incrementBusyWorkerCounter() {
         this.numberOfBusyWorkers++;
     }
-    
+
     decrementBusyWokerCounter(data) {
         this.numberOfBusyWorkers--;
     }
@@ -130,16 +133,56 @@ class Fractal {
                     this.imageData.data[(x + y * this.canvasWidth) * 4 + 2] = 0;
                     this.imageData.data[(x + y * this.canvasWidth) * 4 + 3] = 255;
                 } else {
-                    this.imageData.data[(x + y * this.canvasWidth) * 4] = 255*belongsToSet;
-                    this.imageData.data[(x + y * this.canvasWidth) * 4 + 1] = 0;
-                    this.imageData.data[(x + y * this.canvasWidth) * 4 + 2] = 0;
+                    let [r, g, b] = this.rgbColor(belongsToSet);
+                    this.imageData.data[(x + y * this.canvasWidth) * 4] = r;
+                    this.imageData.data[(x + y * this.canvasWidth) * 4 + 1] = g;
+                    this.imageData.data[(x + y * this.canvasWidth) * 4 + 2] = b;
                     this.imageData.data[(x + y * this.canvasWidth) * 4 + 3] = 255;
                 }
             }
         }
-        if(this.numberOfBusyWorkers == 0) {
+        if (this.numberOfBusyWorkers == 0) {
+            console.timeEnd("Fractal Calculation");
             this.ctx.putImageData(this.imageData, 0, 0);
         }
+        return this;
+    }
+
+    rgbColor(belongsToSet) {
+        let rgb = [];
+        switch (this.colorPinter) {
+            case 0:
+                rgb = [
+                    255 * belongsToSet,
+                    0,
+                    0
+                ];
+                break;
+            case 1:
+                rgb = [
+                    0,
+                    255 * belongsToSet,
+                    0
+                ];
+                break;
+            case 2:
+                rgb = [
+                    0,
+                    0,
+                    255 * belongsToSet
+                ];
+                break;
+        }
+        return rgb;
+    }
+
+    switchColor() {
+        if(this.colorPinter >= this.maxNumberOfColors - 1) {
+            this.colorPinter = 0;
+        } else {
+            this.colorPinter++;
+        }
+        console.log(this.colorPinter);
         return this;
     }
 

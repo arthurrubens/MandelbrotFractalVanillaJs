@@ -1,13 +1,11 @@
 class Gui {
     constructor(conf) {
+        this.movingStep = 0.01;
+        this.magnificationFactorStep = 1;
         this.fractalContainer = document.getElementById(conf.fractalContainerId);
         this.initFractal();
-        this.colorSlider = document.getElementById(conf.colorSliderId);
         this.iterationsSliderSlider = document.getElementById(conf.iterationsSliderId);
-        this.magnificationFactorSlider = document.getElementById(conf.magnificationFactorSliderId);
-        this.canvasXSlider = document.getElementById(conf.canvasXSliderId);
-        this.canvasYSlider = document.getElementById(conf.canvasYSliderId);
-        
+
 
         this.initEvents();
         this.setControlParams();
@@ -23,18 +21,13 @@ class Gui {
     initEvents() {
         window.addEventListener('resize', this.onFractalContainerResize.bind(this));
         this.iterationsSliderSlider.addEventListener('change', this.onIterationsSliderSliderChange.bind(this));
-        this.magnificationFactorSlider.addEventListener('change', this.onMagnificationFactorSliderChange.bind(this));
-        this.canvasXSlider.addEventListener('change', this.onPanXChange.bind(this));
-        this.canvasYSlider.addEventListener('change', this.onPanYChange.bind(this));
-        this.colorSlider.addEventListener('change', this.onCcolorSlider.bind(this));
+
+        // Keyboard events
+        document.onkeydown = this.onKeyDown.bind(this);
     }
 
     setControlParams() {
         this.iterationsSliderSlider.value = this.fractal.iterations;
-        this.magnificationFactorSlider.value = this.fractal.magnificationFactor;
-        this.canvasXSlider.value = this.fractal.panX;
-        this.canvasYSlider.value = this.fractal.panY;
-        this.colorSlider.value = this.fractal.color;
     }
 
     onFractalContainerResize() {
@@ -56,23 +49,42 @@ class Gui {
         this.fractal.draw();
     }
 
-    onMagnificationFactorSliderChange() {
-        this.fractal.magnificationFactor = this.magnificationFactorSlider.value;
-        this.fractal.draw();
+    consoleLogState() {
+        console.log(
+            'panX: ' + this.fractal.panX + '\n',
+            'panY: ' + this.fractal.panY + '\n'
+        );
     }
 
-    onCcolorSlider() {
-        this.fractal.color = this.colorSlider.value/100;
+    onKeyDown(event) {
+        switch (event.keyCode) {
+            case 37: // Left
+                this.fractal.panX -= this.movingStep;
+                break;
+            case 38: // Up
+                this.fractal.panY -= this.movingStep;
+                break;
+            case 39: // Right
+                this.fractal.panX += this.movingStep;
+                break;
+            case 40: // Down
+                this.fractal.panY += this.movingStep;
+                break;
+            case 171: // Firefox +
+            case 187: // +
+                this.fractal.magnificationFactor += this.magnificationFactorStep;
+                break;
+            case 173: // Firefox +
+            case 189: // -
+                this.fractal.magnificationFactor -= this.magnificationFactorStep;
+                break;
+            case 67: // c
+                this.fractal.switchColor();
+                break;
+            default:
+                console.log('Unknown key: ' + event.keyCode);
+                return;
+        }
         this.fractal.draw();
-    }
-
-    onPanXChange() {
-        this.fractal.panX = this.canvasXSlider.value;
-        this.fractal.draw();
-    }
-
-    onPanYChange() {
-        this.fractal.panY = this.canvasYSlider.value;
-        this.fractal.draw();
-    }
+    };
 }

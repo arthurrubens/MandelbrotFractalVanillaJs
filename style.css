@@ -3,14 +3,15 @@ body {
     padding: 10px;
 }
 
-label {
+label, li {
     color: #A5A5A5;
 }
 
 .FractalDiv {
     min-width: 100px;
     width: 100%;
-    height: calc(100% - 200px);
+    height: calc(100vh - 200px);
+    min-height: 500px;
     border: 1px solid #525252;
     margin-bottom: 20px;
 }
