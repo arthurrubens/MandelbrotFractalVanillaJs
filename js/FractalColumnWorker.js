@@ -16,6 +16,7 @@ function checkIfBelongsToMandelbrotSet(x, y, iterations) {
 }
 
 onmessage = function (e) {
+    console.time('Worker' + e.data.workerId);
     const message = {
         workerId: e.data.workerId,
         x: e.data.x,
@@ -33,5 +34,6 @@ onmessage = function (e) {
             );
         }
     }
+    console.timeEnd('Worker' + e.data.workerId);
     postMessage(message);
 }

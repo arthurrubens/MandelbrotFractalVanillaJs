@@ -3,20 +3,14 @@
 <head>
     <title>Fractal</title>
     <link rel="stylesheet" type="text/css" href="style.css">
-    <script src="Fractal.js"></script>
-    <script src="Gui.js"></script>
-    <script>
-        function onLoad() {
-            const gui = new Gui({
-                fractalContainerId: 'FractalDiv',
-                iterationsSliderId: 'IterationsSlider'
-            });
-        }
+    <script type="module">
+        import onLoad from './js/Main.js';
+        window.onload = onLoad;
     </script>
 
 </head>
 
-<body onLoad=onLoad()>
+<body>
     <div id="FractalDiv" class="FractalDiv"></div>
     <form>
         <label>

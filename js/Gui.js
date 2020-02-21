@@ -1,4 +1,6 @@
-class Gui {
+import Fractal from './Fractal.js';
+
+export default class Gui {
     constructor(conf) {
         this.movingStep = 0.01;
         this.magnificationFactorStep = 1;
@@ -80,6 +82,9 @@ class Gui {
                 break;
             case 67: // c
                 this.fractal.switchColor();
+                break;
+            case 82:
+                this.fractal.randomFlySwitch();
                 break;
             default:
                 console.log('Unknown key: ' + event.keyCode);

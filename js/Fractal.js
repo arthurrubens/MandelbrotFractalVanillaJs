@@ -1,7 +1,6 @@
-class Fractal {
+export default class Fractal {
     constructor(container) {
         this.container = container;
-
         this.canvasWidth = 800;
         this.canvasHeight = 600;
         this.fillStyleRgbColor = '#000';
@@ -14,9 +13,11 @@ class Fractal {
         this.workers = [];
         this.numberOfBusyWorkers = 0;
         this.xWidth = 100;
-        this.createWorkers();
         this.colorPinter = 0;
         this.maxNumberOfColors = 3;
+        this.randomFlyOn = false;
+
+        this.createWorkers();
     }
 
     initCanvas() {
@@ -40,7 +41,7 @@ class Fractal {
 
     createWorkers() {
         for (let i = 0; i < this.numberOfWorkers; i++) {
-            this.workers[i] = new Worker('./FractalColumnWorker.js');
+            this.workers[i] = new Worker('./js/FractalColumnWorker.js');
             this.workers[i].onmessage = this.workersOnMessage.bind(this);
             this.workers[i].onerror = this.onWorkerError.bind(this);
             this.workers[i].onmessageerror = this.onWorkerMessageError.bind(this);
@@ -58,7 +59,7 @@ class Fractal {
     }
 
     draw() {
-        console.time("Fractal Calculation");
+        console.time('Draw');
         let workerId = 0,
             xWidth = this.xWidth;
         if (!this.myCanvas) {
@@ -142,8 +143,8 @@ class Fractal {
             }
         }
         if (this.numberOfBusyWorkers == 0) {
-            console.timeEnd("Fractal Calculation");
             this.ctx.putImageData(this.imageData, 0, 0);
+            console.timeEnd('Draw');
         }
         return this;
     }
@@ -177,12 +178,11 @@ class Fractal {
     }
 
     switchColor() {
-        if(this.colorPinter >= this.maxNumberOfColors - 1) {
+        if (this.colorPinter >= this.maxNumberOfColors - 1) {
             this.colorPinter = 0;
         } else {
             this.colorPinter++;
         }
-        console.log(this.colorPinter);
         return this;
     }
 
@@ -206,5 +206,31 @@ class Fractal {
     }
     onWorkerError() {
         console.log('There is a worker error with your worker!');
+    }
+
+    randomFlySwitch() {
+        this.randomFlyOn = !this.randomFlyOn;
+        while (this.randomFlyOn) {
+            switch (Math.round(Math.random() * 2)) {
+                case 0:
+                    for (let i = 0; i < Math.round(Math.random() * 10); i++) {
+                        this.magnificationFactor += 3;
+                        this.draw();
+                    }
+                    break;
+                case 1:
+                    for (let i = 0; i < Math.round(Math.random() * 10); i++) {
+                        this.panX += 0.01;
+                        this.draw();
+                    }
+                    break;
+                case 2:
+                    for (let i = 0; i < Math.round(Math.random() * 10); i++) {
+                        this.panX -= 0.01;
+                        this.draw();
+                    }
+                    break;
+            }
+        }
     }
 }
