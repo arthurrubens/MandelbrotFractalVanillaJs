@@ -59,7 +59,6 @@ export default class Fractal {
     }
 
     draw() {
-        console.time('Draw');
         let workerId = 0,
             xWidth = this.xWidth;
         if (!this.myCanvas) {
@@ -144,7 +143,6 @@ export default class Fractal {
         }
         if (this.numberOfBusyWorkers == 0) {
             this.ctx.putImageData(this.imageData, 0, 0);
-            console.timeEnd('Draw');
         }
         return this;
     }
