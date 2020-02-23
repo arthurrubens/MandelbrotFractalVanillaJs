@@ -3,8 +3,6 @@ export default class Fractal {
         this.container = container;
         this.canvasWidth = 800;
         this.canvasHeight = 600;
-        this.fillStyleRgbColor = '#000';
-        this.color = 100;
         this.magnificationFactor = 351;
         this.panX = 1.92;
         this.panY = 1.08;
@@ -13,8 +11,8 @@ export default class Fractal {
         this.workers = [];
         this.numberOfBusyWorkers = 0;
         this.xWidth = 100;
-        this.colorPinter = 0;
-        this.maxNumberOfColors = 3;
+        this.colors = this.getColors();
+        this.colorPointer = 0;
         this.randomFlyOn = false;
 
         this.createWorkers();
@@ -49,6 +47,37 @@ export default class Fractal {
         return this;
     }
 
+    getColors() {
+        let colors = [
+            (belongsToSet) => [
+                Math.round(255 * belongsToSet),
+                0,
+                0
+            ],
+            (belongsToSet) => [
+                0,
+                Math.round(255 * belongsToSet),
+                0
+            ],
+            (belongsToSet) => [
+                0,
+                0,
+                Math.round(255 * belongsToSet)
+            ],
+            (belongsToSet) => [
+                0,
+                Math.round(255 * belongsToSet),
+                Math.round(255 * belongsToSet)
+            ],
+            (belongsToSet) => [
+                Math.round(255 * belongsToSet),
+                Math.round(87 * belongsToSet),
+                Math.round(51 * belongsToSet)
+            ]
+        ]
+        return colors;
+    }
+
     terminateWorkers() {
         for (let i = 0; i < this.workers.length; i++) {
             if (this.workers[i] && this.workers[i].terminate) {
@@ -59,6 +88,9 @@ export default class Fractal {
     }
 
     draw() {
+        if(this.numberOfBusyWorkers > 0) {
+            return;
+        }
         let workerId = 0,
             xWidth = this.xWidth;
         if (!this.myCanvas) {
@@ -75,15 +107,18 @@ export default class Fractal {
             }
             this.incrementBusyWorkerCounter();
             this.workers[workerId].postMessage({
-                workerId: workerId,
-                x: this.workersX,
-                xWidth: xWidth,
-                yFrom: 0,
-                yTo: this.myCanvas.height,
-                magnificationFactor: this.magnificationFactor,
-                panX: this.panX,
-                panY: this.panY,
-                iterations: this.iterations
+                method: 'calculate',
+                params: {
+                    workerId: workerId,
+                    x: this.workersX,
+                    xWidth: xWidth,
+                    yFrom: 0,
+                    yTo: this.myCanvas.height,
+                    magnificationFactor: this.magnificationFactor,
+                    panX: this.panX,
+                    panY: this.panY,
+                    iterations: this.iterations    
+                }
             });
             this.workersX += xWidth;
             workerId++;
@@ -102,15 +137,19 @@ export default class Fractal {
         }
         this.workersX += xWidth;
         e.currentTarget.postMessage({
-            workerId: e.data.workerId,
-            x: this.workersX,
-            xWidth: xWidth,
-            yFrom: 0,
-            yTo: this.myCanvas.height,
-            magnificationFactor: this.magnificationFactor,
-            panX: this.panX,
-            panY: this.panY,
-            iterations: this.iterations
+            method: 'calculate',
+            params: {
+                workerId: e.data.workerId,
+                x: this.workersX,
+                xWidth: xWidth,
+                yFrom: 0,
+                yTo: this.myCanvas.height,
+                magnificationFactor: this.magnificationFactor,
+                panX: this.panX,
+                panY: this.panY,
+                iterations: this.iterations
+    
+            }
         });
         this.incrementBusyWorkerCounter();
     }
@@ -123,7 +162,7 @@ export default class Fractal {
         this.numberOfBusyWorkers--;
     }
 
-    drawData(data) {
+    async drawData(data) {
         for (let x = data.x; x < data.x + data.xWidth; x++) {
             for (let y = 0; y < this.myCanvas.height; y++) {
                 let belongsToSet = data.columns[x][y];
@@ -133,7 +172,7 @@ export default class Fractal {
                     this.imageData.data[(x + y * this.canvasWidth) * 4 + 2] = 0;
                     this.imageData.data[(x + y * this.canvasWidth) * 4 + 3] = 255;
                 } else {
-                    let [r, g, b] = this.rgbColor(belongsToSet);
+                    let [r, g, b] = this.colors[this.colorPointer](belongsToSet);
                     this.imageData.data[(x + y * this.canvasWidth) * 4] = r;
                     this.imageData.data[(x + y * this.canvasWidth) * 4 + 1] = g;
                     this.imageData.data[(x + y * this.canvasWidth) * 4 + 2] = b;
@@ -147,54 +186,11 @@ export default class Fractal {
         return this;
     }
 
-    rgbColor(belongsToSet) {
-        let rgb = [];
-        switch (this.colorPinter) {
-            case 0:
-                rgb = [
-                    255 * belongsToSet,
-                    0,
-                    0
-                ];
-                break;
-            case 1:
-                rgb = [
-                    0,
-                    255 * belongsToSet,
-                    0
-                ];
-                break;
-            case 2:
-                rgb = [
-                    0,
-                    0,
-                    255 * belongsToSet
-                ];
-                break;
-        }
-        return rgb;
-    }
-
     switchColor() {
-        if (this.colorPinter >= this.maxNumberOfColors - 1) {
-            this.colorPinter = 0;
+        if (this.colorPointer >= this.colors.length - 1) {
+            this.colorPointer = 0;
         } else {
-            this.colorPinter++;
-        }
-        return this;
-    }
-
-    drawDataDirectInCanvas(data) {
-        for (let x = data.x; x < data.x + data.xWidth; x++) {
-            for (let y = 0; y < this.myCanvas.height; y++) {
-                let belongsToSet = data.columns[x][y];
-                if (belongsToSet === 0) {
-                    this.ctx.fillStyle = this.fillStyleRgbColor;
-                } else {
-                    this.ctx.fillStyle = 'hsl(' + this.color + ', 100%, ' + belongsToSet + '%)';
-                }
-                this.ctx.fillRect(x, y, 1, 1);
-            }
+            this.colorPointer++;
         }
         return this;
     }
